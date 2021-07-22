@@ -17,6 +17,7 @@ library(janitor)
 library(maps)
 library(gganimate)
 library(gifski)
+library(viridis)
 
 # loading the .csv file and clean up----
 dr_county <- read_csv('Drought US data/dm_export_20190820_20210713.csv') %>%
@@ -83,12 +84,14 @@ map_usa %>%
     ungroup() %>%
     filter(valid_start == max(valid_start)) %>%
     ggplot(aes(long,lat, group = group)) +
-    geom_polygon(aes(fill=fct_rev(drought_lvl)))+
+    geom_polygon(aes(fill=as.integer(fct_rev(drought_lvl))))+
     borders("state")+
     coord_map()+
-    viridis::scale_fill_viridis(discrete = TRUE, option = "B")+
+    scale_fill_viridis( option = "B",
+                        breaks = c(1,6),
+                        labels = c('None', 'Exceptional'))+
     theme_minimal()+
-    labs(title = "Drought level by County",
+    labs(title = "Drought level in US",
          x = "",
          y = "")+
     theme(legend.title = element_blank(),
@@ -100,18 +103,21 @@ map_usa %>%
           line = element_blank())
 
 
+
 # Animating the plot----
 p <- map_usa %>%
     ungroup() %>%
-    filter(valid_start > "2021-05-04") %>%
+    filter(valid_start > "2020-01-01") %>%
     ggplot(aes(long, lat, group = group)) +
-    geom_polygon(aes(fill = fct_rev(drought_lvl)))+
+    geom_polygon(aes(fill=as.integer(fct_rev(drought_lvl))))+
     borders("state")+
     coord_map()+
-    viridis::scale_fill_viridis(discrete = TRUE, option = "B")+
+    scale_fill_viridis( option = "B",
+                        breaks = c(1,6),
+                        labels = c('None', 'Exceptional'))+
     theme_minimal()+
     transition_manual(frames = valid_start)+
-    labs(title = "Drought level by County",
+    labs(title = "Drought level in US",
          subtitle = "Week:{current_frame}",
          x = "",
          y = "")+
